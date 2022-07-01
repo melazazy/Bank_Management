@@ -1,32 +1,54 @@
-#include <iostream>
-#include <string>
+#include "readFile.h"
 #include <stdlib.h>
-#include<list>
-#include<vector>
+#include <list>
 
 using namespace std;
 
-
 #define KGRN  "\x1B[32m";
 #define KWHT  "\x1B[37m";
+
+const int key=753;
+string user_file = "users.csv";
+vector< pair<string,vector<string> > > users = convert(user_file, key);
 
 void login();
 void admin();
 void employee();
 void client();
+bool checkUser(string user,string pass,string type);
+
 
 int main()
 {
+    for (const auto &str : users) {
+            cout<< str.first <<"\t";
+            for (int i = 0; i < str.second.size(); i++)
+            {
+                cout<< str.second[i] << "\t";
+            }
+            cout<< endl;
+        }
+    
     int type;
     // cout<< KGRN;
+    start:
     login();
     cin>>type;
     switch (type)
     {
     //Admins
-    case 1 :
-    {
+    case 1 :{
+        string user,pass;
         int choise;
+        cout<<"Please Enter User Name: ";
+        cin>>user;
+        cout<<"Please Enter pass: ";
+        cin>>pass;
+        if(!checkUser( user, pass,"admin"))
+        {
+            cout<<"User name and/or Password incorrect\n";
+            goto start;
+        }
         admin();
         cin>>choise;
         switch (choise)
@@ -52,7 +74,6 @@ int main()
                 cin>>conpass;
                 if (pass == conpass)
                 {
-                    /* code */
                     cout<<"Add Admin To user File ....";
                 }
                 else{
@@ -233,9 +254,18 @@ int main()
         break;
     }
     //Employee
-    case 2:
-        {
+    case 2:{
+            string user,pass;
             int choise;
+            cout<<"Please Enter User Name: ";
+            cin>>user;
+            cout<<"Please Enter pass: ";
+            cin>>pass;
+            if(!checkUser( user, pass,"employee"))
+            {
+                cout<<"User name and/or Password incorrect\n";
+                goto start;
+            }
             employee();
             cin>>choise;
             switch (choise)
@@ -347,9 +377,18 @@ int main()
             break;
         }
     // client
-    case 3:
-        {
+    case 3:{
+            string user,pass;
             int choise;
+            cout<<"Please Enter User Name: ";
+            cin>>user;
+            cout<<"Please Enter pass: ";
+            cin>>pass;
+            if(!checkUser( user, pass,"asd"))
+            {
+                cout<<"User name and/or Password incorrect\n";
+                goto start;
+            }
             client();
             cin>>choise;
             switch (choise)
@@ -381,15 +420,17 @@ int main()
 
             break;
         }
-    case 4:
+    // Exit
+    case 4:{
         cout<< "Exit  ....... "<<endl;
         break;
-    default:
+    }
+    default:{
         cout<< "Error"<<endl;
         break;
     }
+    }
     return 0;
-
 }
 
 void login(){
@@ -415,4 +456,20 @@ void client(){
     cout<< "What do you want?"<<endl;   
     cout<< "1) Transfer  2) Reports     3) Exit"<<endl;
     cout<< "Your Choise:";
+}
+
+bool checkUser(string user,string pass,string type){
+    int index=0;
+    for (const auto &str : users) {
+            if(str.first==user)
+                break;
+            index++;
+        }
+    if(index==users.size())
+        return false;
+
+    if(pass == users[index].second[0] && type == users[index].second[1])
+        return true;
+    
+    return false;
 }
