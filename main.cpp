@@ -6,31 +6,29 @@ using namespace std;
 
 #define KGRN  "\x1B[32m";
 #define KWHT  "\x1B[37m";
+// cout<< KGRN;
 
 const int key=753;
 string user_file = "users.csv";
-vector< pair<string,vector<string> > > users = convert(user_file, key);
+vector< pair<string,vector<string> > > users = convert(user_file, key,"decript");
 
 void login();
 void admin();
 void employee();
 void client();
 bool checkUser(string user,string pass,string type);
+void addUser(string user,string pass,string type);
 
 
 int main()
 {
+    // print decripted vector
     for (const auto &str : users) {
             cout<< str.first <<"\t";
             for (int i = 0; i < str.second.size(); i++)
-            {
                 cout<< str.second[i] << "\t";
-            }
-            cout<< endl;
-        }
-    
+            cout<< endl;}
     int type;
-    // cout<< KGRN;
     start:
     login();
     cin>>type;
@@ -38,13 +36,13 @@ int main()
     {
     //Admins
     case 1 :{
-        string user,pass;
+        string user,pass,userType="admin";
         int choise;
         cout<<"Please Enter User Name: ";
         cin>>user;
         cout<<"Please Enter pass: ";
         cin>>pass;
-        if(!checkUser( user, pass,"admin"))
+        if(!checkUser( user, pass,userType))
         {
             cout<<"User name and/or Password incorrect\n";
             goto start;
@@ -74,7 +72,26 @@ int main()
                 cin>>conpass;
                 if (pass == conpass)
                 {
+                    addUser(user,pass,userType);
+                    // encrypte users vector
+                    ofstream temp;
+                    temp.open("temp.txt");
+                    // save it to file
+                    for (const auto &str : users) {
+                        temp<< str.first <<" ";
+                        for (int i = 0; i < str.second.size(); i++)
+                            temp<< str.second[i] << " ";
+                        temp<< endl;}
+                    vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
+                    ofstream u;
+                    u.open("users.csv");
+                    for (const auto &str : enUsers) {
+                        u<< str.first <<" ";
+                        for (int i = 0; i < str.second.size(); i++)
+                            u<< str.second[i] << " ";
+                        u<< endl;}
                     cout<<"Add Admin To user File ....";
+
                 }
                 else{
                     cout<<"Not Match Password";
@@ -92,9 +109,36 @@ int main()
                 cin>>user;
                 cout<< "Are You Sure? yes/no";
                 cin>>sure;
+
                 if(sure =="yes" || sure =="y"){
-                    cout<< "Deleting Account";
-                    /* code */
+                    int index=0;
+                    for (const auto &str : users) {
+                            if(str.first==user && str.second[1] =="admin")
+                                break;
+                            index++;
+                        }
+                    if(index<users.size()){
+                        users.erase(users.begin()+index);
+                        ofstream temp;
+                        temp.open("temp.txt");
+                        // save it to file
+                        for (const auto &str : users) {
+                            temp<< str.first <<" ";
+                            for (int i = 0; i < str.second.size(); i++)
+                                temp<< str.second[i] << " ";
+                            temp<< endl;}
+                        vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
+                        ofstream u;
+                        u.open("users.csv");
+                        for (const auto &str : enUsers) {
+                            u<< str.first <<" ";
+                            for (int i = 0; i < str.second.size(); i++)
+                                u<< str.second[i] << " ";
+                            u<< endl;}
+                        cout<< "Deleting Account\n";
+                    }
+                    else
+                        cout<< "No Account to Delete.... \n";
                 }                
                 
             }
@@ -129,7 +173,24 @@ int main()
                 cin>>conpass;
                 if (pass == conpass)
                 {
-                    /* code */
+                    addUser(user,pass,"employee");
+                    // encrypte users vector
+                    ofstream temp;
+                    temp.open("temp.txt");
+                    // save it to file
+                    for (const auto &str : users) {
+                        temp<< str.first <<" ";
+                        for (int i = 0; i < str.second.size(); i++)
+                            temp<< str.second[i] << " ";
+                        temp<< endl;}
+                    vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
+                    ofstream u;
+                    u.open("users.csv");
+                    for (const auto &str : enUsers) {
+                        u<< str.first <<" ";
+                        for (int i = 0; i < str.second.size(); i++)
+                            u<< str.second[i] << " ";
+                        u<< endl;}
                     cout<<"Add Employee To user File ....";
                 }
                 else{
@@ -149,8 +210,34 @@ int main()
                 cout<< "Are You Sure? yes/no";
                 cin>>sure;
                 if(sure =="yes" || sure =="y"){
-                    cout<< "Deleting Account";
-                    /* code */
+                    int index=0;
+                    for (const auto &str : users) {
+                        if(str.first==user && str.second[1] =="employee")
+                            break;
+                        index++;
+                        }
+                    if(index<users.size()){
+                        users.erase(users.begin()+index);
+                        ofstream temp;
+                        temp.open("temp.txt");
+                        // save it to file
+                        for (const auto &str : users) {
+                            temp<< str.first <<" ";
+                            for (int i = 0; i < str.second.size(); i++)
+                                temp<< str.second[i] << " ";
+                            temp<< endl;}
+                        vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
+                        ofstream u;
+                        u.open("users.csv");
+                        for (const auto &str : enUsers) {
+                            u<< str.first <<" ";
+                            for (int i = 0; i < str.second.size(); i++)
+                                u<< str.second[i] << " ";
+                            u<< endl;}
+                        cout<< "Deleting Account\n";
+                    }
+                    else
+                        cout<< "No Account to Delete.... \n";
                 }                
                 
             }
@@ -163,22 +250,120 @@ int main()
                 cout<<"Error"<<endl;
             }        
             break;
-        }    
-        // Add or View Cash for Employee Account
+        }
+        // manage client
         case 3:
-            {           
+            {    
+            int eselect;
+            cout<< "What do you want?"<<endl;   
+            cout<< "1) Add Client    2) Delete Client     3)Exit ";
+            cout<< "Your Choise:";
+            cin>>eselect;
+            if (eselect == 1)
+            {
+                string user;
+                string pass;
+                string conpass;
+                cout<< "Client Username: ";
+                cin>>user;
+                cout<< "Client Password: "<<endl;  
+                cin>>pass;
+                cout<< "Repeat Password: "<<endl;  
+                cin>>conpass;
+                if (pass == conpass)
+                {
+                    addUser(user,pass,"Client");
+                    // encrypte users vector
+                    ofstream temp;
+                    temp.open("temp.txt");
+                    // save it to file
+                    for (const auto &str : users) {
+                        temp<< str.first <<" ";
+                        for (int i = 0; i < str.second.size(); i++)
+                            temp<< str.second[i] << " ";
+                        temp<< endl;}
+                    vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
+                    ofstream u;
+                    u.open("users.csv");
+                    for (const auto &str : enUsers) {
+                        u<< str.first <<" ";
+                        for (int i = 0; i < str.second.size(); i++)
+                            u<< str.second[i] << " ";
+                        u<< endl;}
+                    cout<<"Add Employee To user File ....";
+                }
+                else{
+                    cout<<"Not Match Password";
+                }
+                user ="";
+                pass ="";
+                conpass="";
+                
+            }
+            else if (eselect==2)
+            {
+                string user;
+                string sure;
+                cout<< "Client Username: ";
+                cin>>user;
+                cout<< "Are You Sure? yes/no";
+                cin>>sure;
+                if(sure =="yes" || sure =="y"){
+                    int index=0;
+                    for (const auto &str : users) {
+                        if(str.first==user && str.second[1] =="Client")
+                            break;
+                        index++;
+                        }
+                    if(index<users.size()){
+                        users.erase(users.begin()+index);
+                        ofstream temp;
+                        temp.open("temp.txt");
+                        // save it to file
+                        for (const auto &str : users) {
+                            temp<< str.first <<" ";
+                            for (int i = 0; i < str.second.size(); i++)
+                                temp<< str.second[i] << " ";
+                            temp<< endl;}
+                        vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
+                        ofstream u;
+                        u.open("users.csv");
+                        for (const auto &str : enUsers) {
+                            u<< str.first <<" ";
+                            for (int i = 0; i < str.second.size(); i++)
+                                u<< str.second[i] << " ";
+                            u<< endl;}
+                        cout<< "Deleting Account\n";
+                    }
+                    else
+                        cout<< "No Account to Delete.... \n";
+                }                
+                
+            }
+            else if (eselect==3)
+            {
+                cout<< "Exiting  ......";
+                /* code */
+            }
+            else{
+                cout<<"Error"<<endl;
+            }        
+            break;
+        }          
+        // Add or View Cash for Employee Account
+        case 4:
+            {  
+            vector<string> users = {"mustafa","azaz"};         
             string user;
             int cselect;
             int cash;
             int found=0;
-            vector<string> users = {"mustafa","azaz"};
-            cout<<"1) Start day     2) End day      3)Exit" <<endl;
-            cout<<" : ";
+            cout<<"1) Start day     2) End day      3)Exit" <<endl<<" : ";
             cin>>cselect;
-            if (cselect !=1 || cselect !=2)
-            {
-                break;
-            }
+            cout<<cselect<<endl;
+            if (cselect!= 1 && cselect!= 2){
+                cout<< "break Account: ";
+                break;}
             cout<< "Employee Account: ";
             cin>>user;
             for (int i = 0; i < users.size(); i++)
@@ -208,7 +393,7 @@ int main()
             break;
             }        
         // Reports
-        case 4:
+        case 5:
         {
             int rselect;
             cout<<"1) Total Bank Report     2) Time Limt Report     3) Client Report    4) Exit" <<endl;
@@ -247,6 +432,9 @@ int main()
 
             break;
         }
+        
+        case 6:
+            return 0;
         default:
             cout<<"ERROR .........";
             break;
@@ -255,13 +443,13 @@ int main()
     }
     //Employee
     case 2:{
-            string user,pass;
+            string user,pass,userType="employee";
             int choise;
             cout<<"Please Enter User Name: ";
             cin>>user;
             cout<<"Please Enter pass: ";
             cin>>pass;
-            if(!checkUser( user, pass,"employee"))
+            if(!checkUser( user, pass,userType))
             {
                 cout<<"User name and/or Password incorrect\n";
                 goto start;
@@ -378,13 +566,13 @@ int main()
         }
     // client
     case 3:{
-            string user,pass;
+            string user,pass,userType="client";
             int choise;
             cout<<"Please Enter User Name: ";
             cin>>user;
             cout<<"Please Enter pass: ";
             cin>>pass;
-            if(!checkUser( user, pass,"asd"))
+            if(!checkUser( user, pass,userType))
             {
                 cout<<"User name and/or Password incorrect\n";
                 goto start;
@@ -430,6 +618,8 @@ int main()
         break;
     }
     }
+
+
     return 0;
 }
 
@@ -442,7 +632,7 @@ void login(){
 void admin(){
     cout<< "Adminstration Panal"<<endl;   
     cout<< "What do you want?"<<endl;   
-    cout<< "1) Manage Admin    2) Manage Employee     3) Cash   4) Reports     5) Exit"<<endl;
+    cout<< "1) Manage Admin    2) Manage Employee  3)manage Client     4) Cash   5) Reports     6) Exit"<<endl;
     cout<< "Your Choise:";
 }
 void employee(){
@@ -465,11 +655,34 @@ bool checkUser(string user,string pass,string type){
                 break;
             index++;
         }
-    if(index==users.size())
+    if(index>=users.size())
         return false;
 
     if(pass == users[index].second[0] && type == users[index].second[1])
         return true;
     
     return false;
+}
+
+void addUser(string user,string pass,string type){
+    //vector< pair<string,vector<string> > > users
+    // int index=0;
+    // for (const auto &str : users) {
+    //         if(str.first==user)
+    //             break;
+    //         index++;
+    //     }
+    if(!checkUser(user,pass,type))
+    {
+        pair<string,vector<string> >acc;
+        vector<string> passType;
+        passType.push_back(pass);
+        passType.push_back(type);
+        acc.first=user;
+        acc.second=passType;
+        users.push_back(acc);
+    }else{
+        cout<<"user already register!!\n";
+    }
+
 }

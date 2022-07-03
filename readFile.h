@@ -4,7 +4,7 @@
 #include <vector>
 
 using namespace std;
-vector< pair<string,vector<string> > > convert(string filename,int key)
+vector< pair<string,vector<string> > > convert(string filename,int key,string conType)
 {
     string user_file = filename;
     ifstream user_out;
@@ -21,7 +21,11 @@ vector< pair<string,vector<string> > > convert(string filename,int key)
             for (size_t i = 0; i < str.length(); i++){
                 char c;
                 c = str[i];
-                int temp = (c ==' ')? temp = c:temp = (c - key);
+                int temp;
+                if(conType =="decript")
+                    temp = (c ==' ')? temp = c:temp = (c - key);
+                else
+                    temp = (c ==' ')? temp = c:temp = (c + key);
                 dstr+=(char)temp;
             }
             string space_char =" ";
