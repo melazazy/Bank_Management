@@ -13,6 +13,7 @@ const int key=753;
 string user_file = "users.csv";
 vector< pair<string,vector<string> > > users = convert(user_file, key,"decript");
 
+// prototype
 void home();
 bool checkUser(string user,string pass,string type);
 void addUser(string user,string pass,string type);
@@ -58,23 +59,7 @@ int main()
                 {
                     addUser(data[0],data[1],userType);
                     // encrypte users vector
-                    ofstream temp;
-                    temp.open("temp.txt");
-                    // save it to file
-                    for (const auto &str : users) {
-                        temp<< str.first <<" ";
-                        for (int i = 0; i < str.second.size(); i++)
-                            temp<< str.second[i] << " ";
-                        temp<< endl;}
-                    vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
-                    ofstream u;
-                    u.open("users.csv");
-                    for (const auto &str : enUsers) {
-                        u<< str.first <<" ";
-                        for (int i = 0; i < str.second.size(); i++)
-                            u<< str.second[i] << " ";
-                        u<< endl;}
-                    cout<<"Add Admin To user File ....";
+                    saveAddUser(users,"users.csv","Add Admin To user File ....",key);
                 }
                 else{
                     cout<<"Not Match Password";
@@ -87,38 +72,10 @@ int main()
                 string sure;
                 cout<< "Admin Username: ";
                 cin>>user;
-                cout<< "Are You Sure? yes/no";
+                cout<< "Are You Sure? yes/no : ";
                 cin>>sure;
-
                 if(sure =="yes" || sure =="y"){
-                    int index=0;
-                    for (const auto &str : users) {
-                            if(str.first==user && str.second[1] =="admin")
-                                break;
-                            index++;
-                        }
-                    if(index<users.size()){
-                        users.erase(users.begin()+index);
-                        ofstream temp;
-                        temp.open("temp.txt");
-                        // save it to file
-                        for (const auto &str : users) {
-                            temp<< str.first <<" ";
-                            for (int i = 0; i < str.second.size(); i++)
-                                temp<< str.second[i] << " ";
-                            temp<< endl;}
-                        vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
-                        ofstream u;
-                        u.open("users.csv");
-                        for (const auto &str : enUsers) {
-                            u<< str.first <<" ";
-                            for (int i = 0; i < str.second.size(); i++)
-                                u<< str.second[i] << " ";
-                            u<< endl;}
-                        cout<< "Deleting Account\n";
-                    }
-                    else
-                        cout<< "No Account to Delete.... \n";
+                    saveDelUser(users,"users.csv",user,"admin",key);
                 }                
                 
             }
@@ -146,23 +103,7 @@ int main()
                 {
                     addUser(data[0],data[1],"employee");
                     // encrypte users vector
-                    ofstream temp;
-                    temp.open("temp.txt");
-                    // save it to file
-                    for (const auto &str : users) {
-                        temp<< str.first <<" ";
-                        for (int i = 0; i < str.second.size(); i++)
-                            temp<< str.second[i] << " ";
-                        temp<< endl;}
-                    vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
-                    ofstream u;
-                    u.open("users.csv");
-                    for (const auto &str : enUsers) {
-                        u<< str.first <<" ";
-                        for (int i = 0; i < str.second.size(); i++)
-                            u<< str.second[i] << " ";
-                        u<< endl;}
-                    cout<<"Add Employee To user File ....";
+                    saveAddUser(users,"users.csv","Add Employee To user File ....",key);
                 }
                 else{
                     cout<<"Not Match Password";
@@ -175,37 +116,10 @@ int main()
                 string sure;
                 cout<< "Employee Username: ";
                 cin>>user;
-                cout<< "Are You Sure? yes/no";
+                cout<< "Are You Sure? yes/no : ";
                 cin>>sure;
                 if(sure =="yes" || sure =="y"){
-                    int index=0;
-                    for (const auto &str : users) {
-                        if(str.first==user && str.second[1] =="employee")
-                            break;
-                        index++;
-                        }
-                    if(index<users.size()){
-                        users.erase(users.begin()+index);
-                        ofstream temp;
-                        temp.open("temp.txt");
-                        // save it to file
-                        for (const auto &str : users) {
-                            temp<< str.first <<" ";
-                            for (int i = 0; i < str.second.size(); i++)
-                                temp<< str.second[i] << " ";
-                            temp<< endl;}
-                        vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
-                        ofstream u;
-                        u.open("users.csv");
-                        for (const auto &str : enUsers) {
-                            u<< str.first <<" ";
-                            for (int i = 0; i < str.second.size(); i++)
-                                u<< str.second[i] << " ";
-                            u<< endl;}
-                        cout<< "Deleting Account\n";
-                    }
-                    else
-                        cout<< "No Account to Delete.... \n";
+                    saveDelUser(users,"users.csv",user,"employee",key);
                 }                
                 
             }
@@ -233,23 +147,8 @@ int main()
                 {
                     addUser(data[0],data[1],"Client");
                     // encrypte users vector
-                    ofstream temp;
-                    temp.open("temp.txt");
-                    // save it to file
-                    for (const auto &str : users) {
-                        temp<< str.first <<" ";
-                        for (int i = 0; i < str.second.size(); i++)
-                            temp<< str.second[i] << " ";
-                        temp<< endl;}
-                    vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
-                    ofstream u;
-                    u.open("users.csv");
-                    for (const auto &str : enUsers) {
-                        u<< str.first <<" ";
-                        for (int i = 0; i < str.second.size(); i++)
-                            u<< str.second[i] << " ";
-                        u<< endl;}
-                    cout<<"Add Employee To user File ....";
+                    saveAddUser(users,"users.csv","Add Client To user File ....",key);
+                    
                 }
                 else{
                     cout<<"Not Match Password";
@@ -263,38 +162,10 @@ int main()
                 string sure;
                 cout<< "Client Username: ";
                 cin>>user;
-                cout<< "Are You Sure? yes/no";
+                cout<< "Are You Sure? yes/no : ";
                 cin>>sure;
-                if(sure =="yes" || sure =="y"){
-                    int index=0;
-                    for (const auto &str : users) {
-                        if(str.first==user && str.second[1] =="Client")
-                            break;
-                        index++;
-                        }
-                    if(index<users.size()){
-                        users.erase(users.begin()+index);
-                        ofstream temp;
-                        temp.open("temp.txt");
-                        // save it to file
-                        for (const auto &str : users) {
-                            temp<< str.first <<" ";
-                            for (int i = 0; i < str.second.size(); i++)
-                                temp<< str.second[i] << " ";
-                            temp<< endl;}
-                        vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
-                        ofstream u;
-                        u.open("users.csv");
-                        for (const auto &str : enUsers) {
-                            u<< str.first <<" ";
-                            for (int i = 0; i < str.second.size(); i++)
-                                u<< str.second[i] << " ";
-                            u<< endl;}
-                        cout<< "Deleting Account\n";
-                    }
-                    else
-                        cout<< "No Account to Delete.... \n";
-                }                
+                if(sure =="yes" || sure =="y")
+                    saveDelUser(users,"users.csv",user,"client",key);
                 
             }
             else if (eselect==3)
