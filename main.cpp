@@ -1,4 +1,5 @@
-#include "readFile.h"
+// #include "readFile.h"
+#include "print.h"
 #include <stdlib.h>
 #include <list>
 
@@ -12,10 +13,7 @@ const int key=753;
 string user_file = "users.csv";
 vector< pair<string,vector<string> > > users = convert(user_file, key,"decript");
 
-void login();
-void admin();
-void employee();
-void client();
+void home();
 bool checkUser(string user,string pass,string type);
 void addUser(string user,string pass,string type);
 
@@ -23,31 +21,26 @@ void addUser(string user,string pass,string type);
 int main()
 {
     // print decripted vector
-    for (const auto &str : users) {
-            cout<< str.first <<"\t";
-            for (int i = 0; i < str.second.size(); i++)
-                cout<< str.second[i] << "\t";
-            cout<< endl;}
+    printVector(users);
     int type;
     start:
-    login();
+    home();
     cin>>type;
     switch (type)
     {
     //Admins
     case 1 :{
-        string user,pass,userType="admin";
+        string userType="admin";
         int choise;
-        cout<<"Please Enter User Name: ";
-        cin>>user;
-        cout<<"Please Enter pass: ";
-        cin>>pass;
-        if(!checkUser( user, pass,userType))
+        // login Function
+        pair<string,string> data=login();
+        if(!checkUser( data.first, data.second,userType))
         {
             cout<<"User name and/or Password incorrect\n";
             goto start;
         }
-        admin();
+        vector<string> d{"Manage Admin","Manage Employee","manage Client","Cash","Reports","Exit"};
+        printChoise(1,d);
         cin>>choise;
         switch (choise)
         {
@@ -55,24 +48,15 @@ int main()
         case 1:
             {            
             int aselect;
-            cout<< "What do you want?"<<endl;   
-            cout<< "1) Add Admin    2) Delete Admin     3)Exit ";
-            cout<< "Your Choise:";
+            vector<string> d{"Add Admin","Delete Admin","Exit"};
+            printChoise(1,d);
             cin>>aselect;
             if (aselect == 1)
             {
-                string user;
-                string pass;
-                string conpass;
-                cout<< "Admin Username: ";
-                cin>>user;
-                cout<< "Admin Password: "<<endl;  
-                cin>>pass;
-                cout<< "Repeat Password: "<<endl;  
-                cin>>conpass;
-                if (pass == conpass)
+                vector<string> data=userData("Admin");
+                if (data[1] == data[2])
                 {
-                    addUser(user,pass,userType);
+                    addUser(data[0],data[1],userType);
                     // encrypte users vector
                     ofstream temp;
                     temp.open("temp.txt");
@@ -91,15 +75,11 @@ int main()
                             u<< str.second[i] << " ";
                         u<< endl;}
                     cout<<"Add Admin To user File ....";
-
                 }
                 else{
                     cout<<"Not Match Password";
                 }
-                user ="";
-                pass ="";
-                conpass="";
-                
+                data.clear();
             }
             else if (aselect==2)
             {
@@ -156,24 +136,15 @@ int main()
         case 2:
             {    
             int eselect;
-            cout<< "What do you want?"<<endl;   
-            cout<< "1) Add Employee    2) Delete Employee     3)Exit ";
-            cout<< "Your Choise:";
+            vector<string> d{"Add Employee","Delete Employee","Exit"};
+            printChoise(2,d);
             cin>>eselect;
             if (eselect == 1)
             {
-                string user;
-                string pass;
-                string conpass;
-                cout<< "Employee Username: ";
-                cin>>user;
-                cout<< "Employee Password: "<<endl;  
-                cin>>pass;
-                cout<< "Repeat Password: "<<endl;  
-                cin>>conpass;
-                if (pass == conpass)
+                vector<string> data=userData("Admin");
+                if (data[1] == data[2])
                 {
-                    addUser(user,pass,"employee");
+                    addUser(data[0],data[1],"employee");
                     // encrypte users vector
                     ofstream temp;
                     temp.open("temp.txt");
@@ -196,10 +167,7 @@ int main()
                 else{
                     cout<<"Not Match Password";
                 }
-                user ="";
-                pass ="";
-                conpass="";
-                
+                data.clear();
             }
             else if (eselect==2)
             {
@@ -255,24 +223,15 @@ int main()
         case 3:
             {    
             int eselect;
-            cout<< "What do you want?"<<endl;   
-            cout<< "1) Add Client    2) Delete Client     3)Exit ";
-            cout<< "Your Choise:";
+            vector<string> d{"Add Client","Delete Client","Exit"};
+            printChoise(3,d);
             cin>>eselect;
             if (eselect == 1)
             {
-                string user;
-                string pass;
-                string conpass;
-                cout<< "Client Username: ";
-                cin>>user;
-                cout<< "Client Password: "<<endl;  
-                cin>>pass;
-                cout<< "Repeat Password: "<<endl;  
-                cin>>conpass;
-                if (pass == conpass)
+                vector<string> data=userData("Client");
+                if (data[1] == data[2])
                 {
-                    addUser(user,pass,"Client");
+                    addUser(data[0],data[1],"Client");
                     // encrypte users vector
                     ofstream temp;
                     temp.open("temp.txt");
@@ -295,9 +254,7 @@ int main()
                 else{
                     cout<<"Not Match Password";
                 }
-                user ="";
-                pass ="";
-                conpass="";
+                data.clear();
                 
             }
             else if (eselect==2)
@@ -425,14 +382,11 @@ int main()
                 /* code */
                 break;
             }
-                        
             default:
                 break;
             }
-
             break;
         }
-        
         case 6:
             return 0;
         default:
@@ -443,18 +397,16 @@ int main()
     }
     //Employee
     case 2:{
-            string user,pass,userType="employee";
+            string userType="employee";
             int choise;
-            cout<<"Please Enter User Name: ";
-            cin>>user;
-            cout<<"Please Enter pass: ";
-            cin>>pass;
-            if(!checkUser( user, pass,userType))
+            pair<string,string> data=login();
+            if(!checkUser( data.first, data.second,userType))
             {
                 cout<<"User name and/or Password incorrect\n";
                 goto start;
             }
-            employee();
+            vector<string> d{"Transactions","client Reports","End-Day","Exit"};
+            printChoise(2,d);
             cin>>choise;
             switch (choise)
             {
@@ -566,18 +518,16 @@ int main()
         }
     // client
     case 3:{
-            string user,pass,userType="client";
+            string userType="client";
             int choise;
-            cout<<"Please Enter User Name: ";
-            cin>>user;
-            cout<<"Please Enter pass: ";
-            cin>>pass;
-            if(!checkUser( user, pass,userType))
+            pair<string,string> data=login();
+            if(!checkUser( data.first, data.second,userType))
             {
                 cout<<"User name and/or Password incorrect\n";
                 goto start;
             }
-            client();
+            vector<string> d{"Transfer","Reports","Exit"};
+            printChoise(3,d);
             cin>>choise;
             switch (choise)
             {
@@ -618,33 +568,12 @@ int main()
         break;
     }
     }
-
-
     return 0;
 }
 
-void login(){
+void home(){
     cout<< "Please , Select Login Type:"<<endl;   
     cout<< "1) Admin    2) Employee     3) Client   4) Exit"<<endl;
-    cout<< "Your Choise:";
-}
-
-void admin(){
-    cout<< "Adminstration Panal"<<endl;   
-    cout<< "What do you want?"<<endl;   
-    cout<< "1) Manage Admin    2) Manage Employee  3)manage Client     4) Cash   5) Reports     6) Exit"<<endl;
-    cout<< "Your Choise:";
-}
-void employee(){
-    cout<< "Employee Panal"<<endl;   
-    cout<< "What do you want?"<<endl;   
-    cout<< "1) Transactions   2) client Reports     3) End-Day      4) Exit"<<endl;
-    cout<< "Your Choise:";
-}
-void client(){
-    cout<< "Client Panal"<<endl;   
-    cout<< "What do you want?"<<endl;   
-    cout<< "1) Transfer  2) Reports     3) Exit"<<endl;
     cout<< "Your Choise:";
 }
 
@@ -666,12 +595,7 @@ bool checkUser(string user,string pass,string type){
 
 void addUser(string user,string pass,string type){
     //vector< pair<string,vector<string> > > users
-    // int index=0;
-    // for (const auto &str : users) {
-    //         if(str.first==user)
-    //             break;
-    //         index++;
-    //     }
+
     if(!checkUser(user,pass,type))
     {
         pair<string,vector<string> >acc;
