@@ -21,15 +21,10 @@ vector< pair<string,vector<string> > > convert(string filename,int key,string co
             for (size_t i = 0; i < str.length(); i++){
                 char c;
                 c = str[i];
-                int temp;
-                if(conType =="decript")
-                    temp = (c ==' ')? temp = c:temp = (c - key);
-                else
-                    temp = (c ==' ')? temp = c:temp = (c + key);
+                int temp = (conType =="decript")? (c ==' ')? c: (c - key):(c ==' ')? c:(c + key);
                 dstr+=(char)temp;
             }
             string space_char =" ";
-            // int num;
             pair<string,vector<string> > u;
             vector<string> userdata;
             vector<string> words;
@@ -48,4 +43,40 @@ vector< pair<string,vector<string> > > convert(string filename,int key,string co
             encriptedUsers.push_back(u);
         }
     return encriptedUsers;
+}
+
+
+void saveToFile(vector< pair<string,vector<string> > > users,string userFileName,string message,int key){
+    // encrypte users vector
+    ofstream temp;
+    temp.open("temp.txt");
+    // save it to file
+    for (const auto &str : users) {
+        temp<< str.first <<" ";
+        for (int i = 0; i < str.second.size(); i++)
+            temp<< str.second[i] << " ";
+        temp<< endl;}
+    vector< pair<string,vector<string> > > enUsers = convert("temp.txt", key,"incript");
+    ofstream u;
+    u.open(userFileName);
+    for (const auto &str : enUsers) {
+        u<< str.first <<" ";
+        for (int i = 0; i < str.second.size(); i++)
+            u<< str.second[i] << " ";
+        u<< endl;}
+    cout<<message<<endl;
+}
+void saveDelUser(vector< pair<string,vector<string> > > users,string userFileName,string user,string type,int key){
+    int index=0;
+    for (const auto &str : users) {
+        if(str.first==user && str.second[1] ==type)
+            break;
+        index++;
+        }
+    if(index<users.size()){
+        users.erase(users.begin()+index);
+        saveToFile(users,userFileName,"User Is Deleted...",key);
+    }
+    else
+        cout<< "No Account to Delete.... \n";
 }

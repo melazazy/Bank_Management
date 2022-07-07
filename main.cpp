@@ -1,5 +1,6 @@
 // #include "readFile.h"
 #include "print.h"
+#include "date.h"
 #include <stdlib.h>
 #include <list>
 
@@ -7,6 +8,9 @@ using namespace std;
 
 #define KGRN  "\x1B[32m";
 #define KWHT  "\x1B[37m";
+
+string appUser="";
+string appType="";
 // cout<< KGRN;
 
 const int key=753;
@@ -18,10 +22,10 @@ void home();
 bool checkUser(string user,string pass,string type);
 void addUser(string user,string pass,string type);
 
-
 int main()
 {
     // print decripted vector
+    cout<<appUser<<"\t"<<appType<<"\n";
     printVector(users);
     int type;
     start:
@@ -40,6 +44,7 @@ int main()
             cout<<"User name and/or Password incorrect\n";
             goto start;
         }
+        cout<<appUser<<"\t"<<appType<<"\n";
         vector<string> d{"Manage Admin","Manage Employee","manage Client","Cash","Reports","Exit"};
         printChoise(1,d);
         cin>>choise;
@@ -59,7 +64,7 @@ int main()
                 {
                     addUser(data[0],data[1],userType);
                     // encrypte users vector
-                    saveAddUser(users,"users.csv","Add Admin To user File ....",key);
+                    saveToFile(users,"users.csv","Add Admin To user File ....",key);
                 }
                 else{
                     cout<<"Not Match Password";
@@ -68,16 +73,10 @@ int main()
             }
             else if (aselect==2)
             {
-                string user;
-                string sure;
-                cout<< "Admin Username: ";
-                cin>>user;
-                cout<< "Are You Sure? yes/no : ";
-                cin>>sure;
-                if(sure =="yes" || sure =="y"){
-                    saveDelUser(users,"users.csv",user,"admin",key);
-                }                
-                
+                string type="admin";
+                vector<string> data =sure(type);
+                if(data[1] =="yes" || data[1] =="y")
+                    saveDelUser(users,"users.csv",data[0],type,key);
             }
             else if (aselect==3)
             {
@@ -103,7 +102,7 @@ int main()
                 {
                     addUser(data[0],data[1],"employee");
                     // encrypte users vector
-                    saveAddUser(users,"users.csv","Add Employee To user File ....",key);
+                    saveToFile(users,"users.csv","Add Employee To user File ....",key);
                 }
                 else{
                     cout<<"Not Match Password";
@@ -112,16 +111,10 @@ int main()
             }
             else if (eselect==2)
             {
-                string user;
-                string sure;
-                cout<< "Employee Username: ";
-                cin>>user;
-                cout<< "Are You Sure? yes/no : ";
-                cin>>sure;
-                if(sure =="yes" || sure =="y"){
-                    saveDelUser(users,"users.csv",user,"employee",key);
-                }                
-                
+                string type="employe";
+                vector<string> data =sure(type);
+                if(data[1] =="yes" || data[1] =="y")
+                    saveDelUser(users,"users.csv",data[0],type,key);
             }
             else if (eselect==3)
             {
@@ -147,7 +140,7 @@ int main()
                 {
                     addUser(data[0],data[1],"Client");
                     // encrypte users vector
-                    saveAddUser(users,"users.csv","Add Client To user File ....",key);
+                    saveToFile(users,"users.csv","Add Client To user File ....",key);
                     
                 }
                 else{
@@ -158,15 +151,10 @@ int main()
             }
             else if (eselect==2)
             {
-                string user;
-                string sure;
-                cout<< "Client Username: ";
-                cin>>user;
-                cout<< "Are You Sure? yes/no : ";
-                cin>>sure;
-                if(sure =="yes" || sure =="y")
-                    saveDelUser(users,"users.csv",user,"client",key);
-                
+                string type="client";
+                vector<string> data =sure(type);
+                if(data[1] =="yes" || data[1] =="y")
+                    saveDelUser(users,"users.csv",data[0],type,key);
             }
             else if (eselect==3)
             {
@@ -178,14 +166,16 @@ int main()
             }        
             break;
         }          
-        // Add or View Cash for Employee Account
+        // Add or review Cash for Employee Account
         case 4:
-            {  
-            vector<string> users = {"mustafa","azaz"};         
-            string user;
-            int cselect;
-            int cash;
-            int found=0;
+            {
+            vector< pair<string,vector<string> > > emp = convert("empTrans.csv", key,"decript");
+            vector<string> currentDay = date("date");
+            string user,day="";
+            for (int i = 0; i < currentDay.size(); i++)
+                day+=currentDay[i];
+            int cselect,cash,found=0;
+            more:
             cout<<"1) Start day     2) End day      3)Exit" <<endl<<" : ";
             cin>>cselect;
             cout<<cselect<<endl;
@@ -194,30 +184,37 @@ int main()
                 break;}
             cout<< "Employee Account: ";
             cin>>user;
-            for (int i = 0; i < users.size(); i++)
-            {
-                if (users[i] == user)
-                {
+            for (int i = 0; i < users.size(); i++){
+                if (users[i].first == user && users[i].second[1]=="employee"){
                     found=1;
-                    break;
-                }                
-            }
-            if (found ==1)
-            {
+                    break;}}
+            if (found ==1){
                 if (cselect ==1)
                 {
                     cout<< "Cash Amount: ";
                     cin>>cash;
-                    cout<< "Add Cash To Employee  ......."<<endl;
+                    pair<string,vector<string> > p;
+                    vector<string> v;
+                    v.push_back(user);
+                    v.push_back(to_string(cash));
+                    p.first= day;
+                    p.second=v;
+                    emp.push_back(p);
+                    saveToFile(emp,"empTrans.csv","Add Cash To Employee ....",key);
                 }
                 else if (cselect ==2)
                 {
-                    cout<< "View End Day Cash For Employee";
+                    int cash =0;
+                    for (int i = 0; i < emp.size(); i++)
+                        if (emp[i].first== day && emp[i].second[0]==user)
+                            cash+=stoi(emp[i].second[1]);
+                    cout<< " End Day Cash For Employee " << user<<" is: "<< cash<<endl;
                 }
             }
             else{
                 cout<< "User Account Error...... "<<endl;
-            }
+                goto more;
+                }
             break;
             }        
         // Reports
@@ -458,15 +455,16 @@ bool checkUser(string user,string pass,string type){
     if(index>=users.size())
         return false;
 
-    if(pass == users[index].second[0] && type == users[index].second[1])
+    if(pass == users[index].second[0] && type == users[index].second[1]){
+        appUser = user;
+        appType = type;
         return true;
-    
+        }
     return false;
 }
 
 void addUser(string user,string pass,string type){
     //vector< pair<string,vector<string> > > users
-
     if(!checkUser(user,pass,type))
     {
         pair<string,vector<string> >acc;

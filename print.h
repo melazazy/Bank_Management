@@ -48,3 +48,14 @@ void printChoise(int t,vector<string> options){
     cout<<endl;
     cout<< "Your Choise: ";
 }
+
+
+
+vector<string>sure(string type){
+        vector<string> u;
+        cout<< type<<" Username: ";
+        cin>>u[0];
+        cout<< "Are You Sure? yes/no : ";
+        cin>>u[1];
+        return u;
+}
