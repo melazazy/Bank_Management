@@ -2,6 +2,7 @@
 #include "print.h"
 #include "date.h"
 #include <stdlib.h>
+#include <cstdlib>
 #include <list>
 
 using namespace std;
@@ -12,7 +13,6 @@ using namespace std;
 string appUser="";
 string appType="";
 // cout<< KGRN;
-
 const int key=753;
 string user_file = "users.csv";
 vector< pair<string,vector<string> > > users = convert(user_file, key,"decript");
@@ -24,6 +24,20 @@ void addUser(string user,string pass,string type);
 
 int main()
 {
+    srand(time(0));
+    int r =  rand();
+    cout<< r << "\n";
+    vector<client> c =  convertClient("empTrans.csv", key,"decript");
+    cout<< "Clients: \n";
+    for (const auto &str : c) {
+        cout<< str.id <<"id\t"
+            << str.client<<"cl\t"
+            <<str.transaction<<"te\t"
+            <<str.emp<<"em\t"
+            <<str.amount<<"am\t"
+            <<str.date<<"da\t"
+            <<endl;
+}
     // print decripted vector
     cout<<appUser<<"\t"<<appType<<"\n";
     printVector(users);
@@ -281,21 +295,31 @@ int main()
             // Transaction
             case 1:
             {
+                vector<client> c =  convertClient("empTrans.csv", key,"decript");
+                // vector<int> clients;
                 int tselect;
-                cout<<"1) Debit     2) Withdraw     3) Transfer     4) Exit \n";
+                int balance = 0;  
+                cout<<"1) Deposit     2) Withdraw     3) Transfer     4) Exit \n";
                 cout<<" : ";
                 cin>>tselect;
                 if (tselect ==1 ||tselect ==2 ||tselect ==3)
-                {
-                    int userAccount;
+                {                      
+                    string userAccount;
                     cout<<" Account Number: ";
                     cin >>userAccount;
+                    string arr[6];
+                    for (int i = 0; i < c.size(); i++)
+                    {
+                        cout<<c[i].client<<"\t"<< c[i].emp<<"\t"<< i <<"\n";
+                        if(c[i].client == userAccount)
+                            balance +=c[i].amount ;
+                    }
+                    cout<<"Balance Is "<< balance<<"\n";
                     switch(tselect)
                     {
-                        // Debit  
+                        // deposit  
                         case 1:
                         {
-                            int balance = 2500;
                             int amount;
                             cout<<"Amount: ";
                             cin>>amount;
@@ -303,7 +327,8 @@ int main()
                             {
                                 cout<<"Cant Add this Value ...";
                             }else{
-                                cout<<"Add "<<amount <<" To "<< balance << " Total Balance = "<< amount+balance<<"\n";
+                                cout<<"Add "<<amount <<" To "<< balance << " Total Balance = "
+                                << amount+balance<<"\n";
                             }
                             break;
                         }
@@ -316,7 +341,7 @@ int main()
                             cin>>amount;
                             if (amount <=0 || amount>balance)
                             {
-                                cout<<"Cant Withdraw this Value ...";
+                                cout<<"Can Not Withdraw this Value ...";
                             }else{
                                 cout<<"Withdraw "<<amount <<" From "<< balance << " Total Balance = "<< balance-amount<<"\n";
                             }
@@ -354,7 +379,6 @@ int main()
                 }
                 break;
             }
-            
             // Client Report
             case 2:
             {
@@ -454,7 +478,6 @@ bool checkUser(string user,string pass,string type){
         }
     if(index>=users.size())
         return false;
-
     if(pass == users[index].second[0] && type == users[index].second[1]){
         appUser = user;
         appType = type;
