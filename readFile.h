@@ -4,6 +4,14 @@
 #include <vector>
 
 using namespace std;
+
+struct client
+{
+    int id,amount;
+    string client,transaction,emp,date;
+
+};
+
 vector< pair<string,vector<string> > > convert(string filename,int key,string conType)
 {
     string user_file = filename;
@@ -79,4 +87,104 @@ void saveDelUser(vector< pair<string,vector<string> > > users,string userFileNam
     }
     else
         cout<< "No Account to Delete.... \n";
+}
+
+vector<client> convertClient(string filename,int key,string conType)
+{
+    string user_file = filename;
+    ifstream user_out;
+    user_out.open(user_file);
+    vector<client > encriptedClient;
+    int item=0;
+    for(string str; getline(user_out,str);)
+    {
+        // add New Row To Vector
+        encriptedClient.push_back(client());
+        // string to save line after decripte
+        string dstr="";
+        // read line char by char and decript and save to decripted string
+        for (size_t i = 0; i < str.length(); i++){
+            char c;
+            c = str[i];
+            int temp = (conType =="decript")? (c ==' ')? c: (c - key):(c ==' ')? c:(c + key);
+            dstr+=(char)temp;
+        }
+        // string space_char =" ";
+        string strtemp="";
+        int index = 1;
+        for (int i = 0; i < dstr.size(); i++)
+        {
+            if (dstr[i]!=' ')
+                strtemp.push_back(dstr[i]);
+            else{
+                if (index==1)
+                    encriptedClient[item].id =stoi(strtemp);
+                else if (index==2)
+                    encriptedClient[item].client=strtemp;
+                else if (index==3)
+                    encriptedClient[item].transaction=strtemp;
+                else if (index==4)
+                    encriptedClient[item].emp=strtemp;
+                else if (index==5)
+                    encriptedClient[item].amount=stoi(strtemp);
+                else
+                    encriptedClient[item].date=strtemp;
+                strtemp="";
+                index++;
+            }
+        }
+        item++;
+    }
+    return encriptedClient;
+}
+
+void saveTransaction(vector<client>cl , string filename,int key,string conType){
+    string user_file = filename;
+    fstream user_out;
+    user_out.open(user_file,ios::app);
+    vector<client> vec;
+    int item=0;
+    for(string str; getline(user_out,str);)
+    {
+        // add New Row To Vector
+        vec.push_back(client());
+        // string to save line after decripte
+        string strtemp="";
+        int index = 1;
+        for (int i = 0; i < str.size(); i++)
+        {
+            if (str[i]!=' ')
+                strtemp.push_back(str[i]);
+            else{
+                if (index==1)
+                    vec[item].id =stoi(strtemp);
+                else if (index==2)
+                    vec[item].client=strtemp;
+                else if (index==3)
+                    vec[item].transaction=strtemp;
+                else if (index==4)
+                    vec[item].emp=strtemp;
+                else if (index==5)
+                    vec[item].amount=stoi(strtemp);
+                else
+                    vec[item].date=strtemp;
+                strtemp="";
+                index++;
+            }
+            item++;
+        }
+    }
+    
+    
+    for(const client & c : cl)
+        {
+            user_out <<c.id << ' ';
+            user_out <<c.client << ' ';
+            user_out <<c.transaction << ' ';
+            user_out <<c.emp << ' ';
+            user_out <<c.amount << ' ';
+            user_out <<c.date << ' ';
+            user_out << endl;
+        }
+    user_out.close();
 }
