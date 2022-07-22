@@ -1,6 +1,5 @@
 // #include "readFile.h"
 #include "print.h"
-#include "date.h"
 #include <stdlib.h>
 #include <cstdlib>
 #include <list>
@@ -10,35 +9,32 @@ using namespace std;
 #define KGRN  "\x1B[32m";
 #define KWHT  "\x1B[37m";
 
+string saveAcc="0000000";
 string appUser="";
 string appType="";
 // cout<< KGRN;
 const int key=753;
+const string clientTrans="clientTrans.csv";
+const string empTrans="empTrans.csv";
 string user_file = "users.csv";
 vector< pair<string,vector<string> > > users = convert(user_file, key,"decript");
-
+vector<client> c =  convertClient(clientTrans, key,"decript");
 // prototype
 void home();
 bool checkUser(string user,string pass,string type);
 void addUser(string user,string pass,string type);
+void printClient(client cl);
+void uservector(vector<client>ut,client c);
+void printClientTopLine();
+vector<client> trans(string userAccount);
 
 int main()
 {
-    srand(time(0));
-    int r =  rand();
-    cout<< r << "\n";
-    vector<client> c =  convertClient("empTrans.csv", key,"decript");
+    // system("color 2f");
     cout<< "Clients: \n";
-    for (const auto &str : c) {
-        cout<< str.id <<"id\t"
-            << str.client<<"cl\t"
-            <<str.transaction<<"te\t"
-            <<str.emp<<"em\t"
-            <<str.amount<<"am\t"
-            <<str.date<<"da\t"
-            <<endl;
-}
-    // print decripted vector
+    printClientTopLine();
+    for (const auto &str : c)
+        printClient(str);
     cout<<appUser<<"\t"<<appType<<"\n";
     printVector(users);
     int type;
@@ -58,6 +54,7 @@ int main()
             cout<<"User name and/or Password incorrect\n";
             goto start;
         }
+        adminStart:
         cout<<appUser<<"\t"<<appType<<"\n";
         vector<string> d{"Manage Admin","Manage Employee","manage Client","Cash","Reports","Exit"};
         printChoise(1,d);
@@ -183,7 +180,7 @@ int main()
         // Add or review Cash for Employee Account
         case 4:
             {
-            vector< pair<string,vector<string> > > emp = convert("empTrans.csv", key,"decript");
+            vector< pair<string,vector<string> > > emp = convert(empTrans, key,"decript");
             vector<string> currentDay = date("date");
             string user,day="";
             for (int i = 0; i < currentDay.size(); i++)
@@ -193,16 +190,17 @@ int main()
             cout<<"1) Start day     2) End day      3)Exit" <<endl<<" : ";
             cin>>cselect;
             cout<<cselect<<endl;
-            if (cselect!= 1 && cselect!= 2){
-                cout<< "break Account: ";
-                break;}
+            if (cselect!= 1 && cselect!= 2)
+            goto more;
             cout<< "Employee Account: ";
             cin>>user;
             for (int i = 0; i < users.size(); i++){
                 if (users[i].first == user && users[i].second[1]=="employee"){
                     found=1;
-                    break;}}
+                    break;}
+                    }
             if (found ==1){
+                 // Add Cash for Employee Account
                 if (cselect ==1)
                 {
                     cout<< "Cash Amount: ";
@@ -214,15 +212,26 @@ int main()
                     p.first= day;
                     p.second=v;
                     emp.push_back(p);
-                    saveToFile(emp,"empTrans.csv","Add Cash To Employee ....",key);
+                    saveToFile(emp,empTrans,"Add Cash To Employee ....",key);
                 }
+                 // Review Cash for Employee Account
                 else if (cselect ==2)
                 {
                     int cash =0;
+                    int trans=0;
                     for (int i = 0; i < emp.size(); i++)
                         if (emp[i].first== day && emp[i].second[0]==user)
                             cash+=stoi(emp[i].second[1]);
-                    cout<< " End Day Cash For Employee " << user<<" is: "<< cash<<endl;
+                    vector<client> cashTrans =  convertClient(clientTrans, key,"decript");
+                    for (int i = 0; i < cashTrans.size(); i++)
+                    {
+                        string newday="";
+                        for (int j = 0; j < 8; j++)
+                            newday+=cashTrans[i].date[j];
+                        if (newday == day && cashTrans[i].emp==user)
+                            trans+=cashTrans[i].amount;
+                    }
+                cout<< " End Day Cash For Employee " << user<<" is: "<< cash+trans<<endl;
                 }
             }
             else{
@@ -235,39 +244,30 @@ int main()
         case 5:
         {
             int rselect;
-            cout<<"1) Total Bank Report     2) Time Limt Report     3) Client Report    4) Exit" <<endl;
+            cout<<"1) Client Report    2) Exit" <<endl;
             cout<<" : ";
             cin>>rselect;
             switch (rselect)
             {
             case 1:
             {
-                cout<<"Total Bank Report "<<endl;
-                /* code */
-                break;
+                string user;
+                cout<<"Enter Client Account: ";
+                cin>>user;
+                cout<<"Total Client Report "<<endl;
+                vector<client> cc= trans(user);
+                printClientTopLine();
+                for (int i = 0; i < cc.size(); i++)
+                    printClient(cc[i]);
+                goto adminStart;
             }
             case 2:
             {
-                cout<<"Time Report "<<endl;
-                /* code */
-                break;
-            }
-            case 3:
-            {
-                cout<<"Client Report "<<endl;
-                /* code */
-                break;
-            }
-            case 4:
-            {
                 cout<<"Exit  ......... "<<endl;
-                /* code */
-                break;
+                goto adminStart;
             }
-            default:
-                break;
             }
-            break;
+            goto adminStart;
         }
         case 6:
             return 0;
@@ -287,6 +287,7 @@ int main()
                 cout<<"User name and/or Password incorrect\n";
                 goto start;
             }
+            again:
             vector<string> d{"Transactions","client Reports","End-Day","Exit"};
             printChoise(2,d);
             cin>>choise;
@@ -295,24 +296,24 @@ int main()
             // Transaction
             case 1:
             {
-                vector<client> c =  convertClient("empTrans.csv", key,"decript");
-                // vector<int> clients;
                 int tselect;
-                int balance = 0;  
-                cout<<"1) Deposit     2) Withdraw     3) Transfer     4) Exit \n";
+                int balance = 0;
+                
+                cout<<"1) Deposit     2) Withdraw     3) Transfer     4) Client Report \n";
                 cout<<" : ";
                 cin>>tselect;
-                if (tselect ==1 ||tselect ==2 ||tselect ==3)
+                if (tselect ==1 ||tselect ==2 ||tselect ==3||tselect ==4)
                 {                      
                     string userAccount;
                     cout<<" Account Number: ";
                     cin >>userAccount;
-                    string arr[6];
+                    vector<client>userTransactions=trans(userAccount);
                     for (int i = 0; i < c.size(); i++)
                     {
-                        cout<<c[i].client<<"\t"<< c[i].emp<<"\t"<< i <<"\n";
-                        if(c[i].client == userAccount)
+                        if(c[i].client == userAccount){
+                            userTransactions.push_back(c[i]);
                             balance +=c[i].amount ;
+                        }
                     }
                     cout<<"Balance Is "<< balance<<"\n";
                     switch(tselect)
@@ -320,22 +321,27 @@ int main()
                         // deposit  
                         case 1:
                         {
-                            int amount;
+                            int amount=0;
                             cout<<"Amount: ";
                             cin>>amount;
                             if (amount <=0)
                             {
                                 cout<<"Cant Add this Value ...";
                             }else{
+                                client cl = doTransaction(userAccount,amount,saveAcc,appUser);
+                                printClient(cl);
+                                cout<<"Trans Acc Done\n";
+                                saveTransaction(cl ,clientTrans,key,"incript");
+                                cout<<"Save TO File Done\n";
                                 cout<<"Add "<<amount <<" To "<< balance << " Total Balance = "
                                 << amount+balance<<"\n";
                             }
-                            break;
+                            goto again;
                         }
                         // Withdraw  
                         case 2:
                         {
-                            int balance = 2500;
+                            // int balance = 2500;
                             int amount;
                             cout<<"Amount: ";
                             cin>>amount;
@@ -343,14 +349,18 @@ int main()
                             {
                                 cout<<"Can Not Withdraw this Value ...";
                             }else{
+                                client cl = doTransaction(userAccount,amount*-1,saveAcc,appUser);
+                                printClient(cl);
+                                cout<<"Trans Acc Done\n";
+                                saveTransaction(cl ,clientTrans,key,"incript");
+                                cout<<"Save TO File Done\n";
                                 cout<<"Withdraw "<<amount <<" From "<< balance << " Total Balance = "<< balance-amount<<"\n";
                             }
-                            break;
+                            goto again;
                         }
                         // Transfer  
                         case 3:
                         {
-                            int balance = 2500;
                             int traccount;
                             int amount;
                             cout<<"Account To Transfer: ";
@@ -361,35 +371,39 @@ int main()
                             {
                                 cout<<"Can Not Transfer this Value ...";
                             }else{
+                                client cl = doTransaction(userAccount,amount*-1,to_string(traccount),appUser);
+                                printClient(cl);
+                                cout<<"Trans Acc Done\n";
+                                saveTransaction(cl ,clientTrans,key,"incript");
+                                cout<<"Save TO File Done\n";
                                 cout<<"Transfer "<<amount <<" From "<< balance << " Your Balance = "<< balance-amount<<"\n";
                             }
-                            break;
+                            goto again;
                         }
+                        // Client Report
                         case 4:
                         {
+                            cout<<"Report: "<<userTransactions.size()<<"  Items\n";
+                            cout<<"Last 10 Transaction For Your Account Is: \n";
+                            printClientTopLine();
+                            int size=userTransactions.size();
+                            for (int i = size; i >=0&&i>=size-10; i--)
+                            {
+                                printClient(userTransactions[i]);
+                            }
                             break;
                         }
                         default:
                             break;
                     }
                 }
-                
                 else{
                     break;
                 }
-                break;
-            }
-            // Client Report
-            case 2:
-            {
-                int userAccount;
-                cout<<" Account Number: ";
-                cin >>userAccount;
-                cout<<"Last 10 Transaction For Your Account Is: \n";
-                break;
-            }
+                goto again;
+            }            
             // End Day Report
-            case 3:
+            case 2:
             {
                 int startcash = 10000;
                 int endcash;
@@ -410,7 +424,7 @@ int main()
         }
     // client
     case 3:{
-            string userType="client";
+            string userType="Client";
             int choise;
             pair<string,string> data=login();
             if(!checkUser( data.first, data.second,userType))
@@ -426,18 +440,39 @@ int main()
             // transfer
             case 1:
             {
-                int tracount;
-                int amount;
+                int traccount;
+                int amount,balance=0;
                 cout<<"Account To Transfer: ";
-                cin>> tracount;
-                cout<<"Amount To Transfer: ";
-                cin>> amount;
+                cin>>traccount;
+                cout<<"Amount: ";
+                cin>>amount;
+                for (int i = 0; i < c.size(); i++)
+                {
+                    if(c[i].client == appUser){
+                        balance +=c[i].amount ;
+                    }
+                }
+                if (amount <=0 || amount>balance)
+                {
+                    cout<<"Can Not Transfer this Value ...";
+                }else{
+                    client cl = doTransaction(appUser,amount*-1,to_string(traccount),appUser);
+                    printClient(cl);
+                    cout<<"Trans Acc Done\n";
+                    saveTransaction(cl ,clientTrans,key,"incript");
+                    cout<<"Save TO File Done\n";
+                    cout<<"Transfer "<<amount <<" TO "<< traccount << " Your Balance = "<< balance-amount<<"\n";
+                }
                 break;
             }
             // Reports
             case 2:
             {
-                cout<<"Last 10 Transaction For Your Account Is: \n";
+                cout<<"Your Report  For ////"<<appUser<<"//// Account Is: " <<endl;
+                vector<client> cc= trans(appUser);
+                printClientTopLine();
+                for (int i = 0; i < cc.size(); i++)
+                    printClient(cc[i]);
                 break;
             }
             case 3:
@@ -501,4 +536,46 @@ void addUser(string user,string pass,string type){
         cout<<"user already register!!\n";
     }
 
+}
+
+void printClient(client cl){
+    cout<<cl.id<<"\t"
+    << cl.client<<"\t"
+    <<cl.transaction<<"\t"
+    <<cl.emp<<"\t"
+    <<cl.amount<<"\t";
+    printDate(cl.date);
+    cout<<"\t"
+    <<endl;
+}
+void printClientTopLine(){
+    cout<<"Id "<<"\t"
+    << "Client "<<"\t"
+    <<"Transaction"<<"\t"
+    <<"Employee"<<"\t"
+    <<"Amount"<<"\t"
+    <<"Date"<<"\t"
+    <<endl;
+}
+
+void uservector(vector<client>ut,client c){
+    ut.push_back(client());
+    ut[ut.size()].id=c.id;
+    ut[ut.size()].client=c.client;
+    ut[ut.size()].transaction=c.transaction;
+    ut[ut.size()].emp=c.emp;
+    ut[ut.size()].amount=c.amount;
+    ut[ut.size()].date=c.date;
+}
+
+vector<client> trans(string userAccount){
+    int balance;
+    vector<client>UserT;
+    for (int i = 0; i < c.size(); i++)
+    {
+        if(c[i].client == userAccount){
+            UserT.push_back(c[i]);
+        }
+    }
+    return UserT;
 }

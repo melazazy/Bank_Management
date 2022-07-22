@@ -1,7 +1,11 @@
+
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <cstdlib>
+#include "date.h"
 
 using namespace std;
 
@@ -114,11 +118,15 @@ vector<client> convertClient(string filename,int key,string conType)
         int index = 1;
         for (int i = 0; i < dstr.size(); i++)
         {
-            if (dstr[i]!=' ')
+            if (dstr[i]!=' '&& dstr[i]!='\n')
                 strtemp.push_back(dstr[i]);
             else{
                 if (index==1)
-                    encriptedClient[item].id =stoi(strtemp);
+                {
+                    stringstream id;
+                    id<<strtemp;
+                    id>>encriptedClient[item].id;
+                }
                 else if (index==2)
                     encriptedClient[item].client=strtemp;
                 else if (index==3)
@@ -126,9 +134,16 @@ vector<client> convertClient(string filename,int key,string conType)
                 else if (index==4)
                     encriptedClient[item].emp=strtemp;
                 else if (index==5)
-                    encriptedClient[item].amount=stoi(strtemp);
-                else
+                {
+                    stringstream aa;
+                    aa<<strtemp;
+                    aa>>encriptedClient[item].amount;
+                }
+                else if(index==6)
+                {
                     encriptedClient[item].date=strtemp;
+                }
+
                 strtemp="";
                 index++;
             }
@@ -138,53 +153,66 @@ vector<client> convertClient(string filename,int key,string conType)
     return encriptedClient;
 }
 
-void saveTransaction(vector<client>cl , string filename,int key,string conType){
+void saveTransaction(client cl , string filename,int key,string conType){
     string user_file = filename;
     fstream user_out;
     user_out.open(user_file,ios::app);
-    vector<client> vec;
     int item=0;
-    for(string str; getline(user_out,str);)
+    cout<<"String: "<<endl;
+    string n = to_string(cl.id)+" "+cl.client+" "+cl.transaction+" "+cl.emp+" "+to_string(cl.amount)+" "+cl.date+"\n";
+    cout<<n<<endl;
+    client newtrans;
+    string strtemp="";
+    int index = 1;
+    for(int i =0;i<n.size();i++)
     {
-        // add New Row To Vector
-        vec.push_back(client());
-        // string to save line after decripte
-        string strtemp="";
-        int index = 1;
-        for (int i = 0; i < str.size(); i++)
-        {
-            if (str[i]!=' ')
-                strtemp.push_back(str[i]);
+            if (n[i]!=' '&&n[i]!='\n')
+            {
+                char c;
+                c = n[i];
+                int temp = (conType =="decript")? (c ==' ')? c: (c - key):(c ==' ')? c:(c + key);
+                strtemp+=(char)temp;
+            }
             else{
                 if (index==1)
-                    vec[item].id =stoi(strtemp);
+                    user_out <<strtemp << ' ';
                 else if (index==2)
-                    vec[item].client=strtemp;
+                    user_out <<strtemp << ' ';
                 else if (index==3)
-                    vec[item].transaction=strtemp;
+                    user_out <<strtemp << ' ';
                 else if (index==4)
-                    vec[item].emp=strtemp;
+                    user_out <<strtemp << ' ';
                 else if (index==5)
-                    vec[item].amount=stoi(strtemp);
-                else
-                    vec[item].date=strtemp;
+                    user_out <<strtemp << ' ';
+                else if (index==6)
+                    user_out <<strtemp << ' ';
                 strtemp="";
                 index++;
-            }
-            item++;
         }
     }
+    user_out << endl;
+    cout<<"String222: "<<endl;
+    string sss = to_string(newtrans.id)+" "+newtrans.client+" "+newtrans.transaction+" "+newtrans.emp+" "+to_string(newtrans.amount)+" "+newtrans.date;
+    cout<<sss<<endl;
+    cout<<"End of newtrans Client\n";
     
-    
-    for(const client & c : cl)
-        {
-            user_out <<c.id << ' ';
-            user_out <<c.client << ' ';
-            user_out <<c.transaction << ' ';
-            user_out <<c.emp << ' ';
-            user_out <<c.amount << ' ';
-            user_out <<c.date << ' ';
-            user_out << endl;
-        }
-    user_out.close();
+}
+
+client doTransaction(string userAccount,int amount,string trans,string emp){
+    client t;
+    srand(time(0));
+    t.id =  rand();
+    t.client=userAccount;
+    t.transaction=trans;
+    t.amount=amount;
+    t.emp=emp;
+    string time ="";
+    vector<string> tt=date("time");
+    for (int i = 0; i < tt.size(); i++)
+    {
+        time+=tt[i];
+    }
+    t.date=time;
+    return t;
+
 }

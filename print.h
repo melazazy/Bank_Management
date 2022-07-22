@@ -1,5 +1,4 @@
 #include "readFile.h"
-
 void printVector(vector< pair<string,vector<string> > > x){
     for (const auto &str : x) {
     cout<< str.first <<"\t";
